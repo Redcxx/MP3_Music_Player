@@ -1,0 +1,1479 @@
+import javax.swing.JFileChooser;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.awt.Container;
+import java.awt.GridBagLayout;
+import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.JPanel;
+import javax.swing.JButton;
+
+public class AddSongGui extends JFrame{
+  private final JLabel title, genre, artist, url;
+  private final JTextField titleText, genreText, artistText, urlText;
+  private final JButton add, browse, cancel;
+  private final JPanel pane;
+
+  private final Container contents;
+  private final GridBagConstraints settings;
+
+  private final SDBGUI parent;
+
+  public AddSongGui(SDBGUI parent) {
+    this.parent = parent;
+    setTitle("add");
+    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+    url  = new JLabel("URL: ");
+    genre = new JLabel("Genre: ");
+    title  = new JLabel("Title: ");
+    artist  = new JLabel("Artist: ");
+    urlText  = new JTextField("");
+    genreText = new JTextField("");
+    artistText = new JTextField("");
+    titleText = new JTextField("");
+    add  = new JButton("Add");
+    cancel = new JButton("Cancel");
+    browse  = new JButton("Browse");
+    pane = new JPanel();
+
+    contents = getContentPane();
+    settings = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0,
+                                      GridBagConstraints.CENTER,
+                                      GridBagConstraints.HORIZONTAL,
+                                      new Insets(10,10,10,10), 0, 0);
+    init();
+
+    setInteraction();
+
+    pack();
+    setLocationRelativeTo(null);
+  }//constructor
+
+  private void init() {
+
+    pane.setLayout(new GridBagLayout());
+
+    pane.add(title, settings);
+    settings.gridx++;
+    settings.gridwidth = 2;
+    pane.add(titleText, settings);
+    settings.gridy++;
+    pane.add(genreText, settings);
+    settings.gridx--;
+    pane.add(genre, settings);
+    settings.gridy++;
+    pane.add(artist, settings);
+    settings.gridx++;
+    settings.gridwidth = 2;
+    pane.add(artistText, settings);
+    settings.gridy++;
+    pane.add(urlText, settings);
+    settings.gridx--;
+    pane.add(url, settings);
+    settings.gridwidth = 1;
+    settings.gridy++;
+    pane.add(cancel, settings);
+    settings.gridx++;
+    pane.add(browse, settings);
+    settings.gridx++;
+    pane.add(add, settings);
+
+    contents.add(BorderLayout.CENTER, pane);
+
+    Utilities.paintGui(AddSongGui.this);
+
+    // cancel.setBackground(Color.RED.darker().darker());
+
+  }//init
+
+  private void setInteraction() {
+    cancel.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent ae) {
+        String[] options = { "just close it!", "actually no" };
+        int reply = Utilities.showQuitDialog( AddSongGui.this, options,
+                                              "./cute_icon.png",
+                                              "are you sure you want to quit?"
+                                              + "\nchanges will be lost!",
+                                              "wait a moment...");
+        if(reply == 0)
+          dispose();
+        else {
+          System.out.println("Weebcome baaak");
+        }//ifelse
+      }//actionPerformed
+    });//anonymous listener
+    browse.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent ae) {
+        File file = Utilities.getFileFromUser(AddSongGui.this, "mp3");
+        if(file != null) {
+          if(file.getName().endsWith(".mp3")) {
+            try {
+              String songUrl = file.toURI().toURL().toString();
+              String songString = "\t\t\t" + songUrl + "\t0";
+              Song song = new Song(songString);
+              urlText.setText(songUrl);
+            } catch(MalformedURLException me) {
+              Utilities.log(me);
+              Utilities.showMsgDialog(AddSongGui.this, "./cute_icon.png",
+                              "This file can't be converted into valid url...",
+                                      "a sorry message");
+            } catch(CorruptedSongException ce) {
+              Utilities.log(ce);
+              Utilities.showMsgDialog(AddSongGui.this, "./cute_icon.png",
+                              "This file is not successfully converted...",
+                                      "a sorry message");
+            }//try catch
+          } else {// not mp3 file
+            Utilities.showMsgDialog(AddSongGui.this, "./scary_icon.png",
+                                    "Please provide a valid \".mp3\" file",
+                                    "a message meant to scare you");
+          }//if else, check if its mp3
+        } else {
+          System.out.println("User did not select any file");
+        }//if else`
+      }//actionPerformed
+    });
+    add.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent ae) {
+          String input = "";
+          input += titleText.getText() + "\t";
+          input += artistText.getText() + "\t";
+          input += genreText.getText() + "\t";
+          input += urlText.getText() + "\t";
+          input += 0;
+          try {
+            Song newSong = new Song(input);
+            if(parent.addSong(newSong)) {
+              Utilities.showMsgDialog(AddSongGui.this, "cute_icon.png",
+                            "Song successfully added", "a cheerful message");
+              parent.pack();
+              dispose();
+            } else {
+              String[] opts = { "Just override it!",
+                                "wait, it's a mistakaaa" };
+              int reply = Utilities.showQuitDialog(AddSongGui.this, opts,
+                                      "./cute_icon.png",
+                                      "Song with the same title, artist and"
+                                      + "\ngenre already exists in database"
+                                      + "\ndo you wish to override it?",
+                                      "heeey just to confirm..");
+              if(reply == 0) {
+                parent.addSongForce(newSong);
+                dispose();
+              } else {
+                System.out.println("good decision!");
+              }//if else
+            }//if else
+          } catch(Exception e) {
+            Utilities.log(e);
+            Utilities.showMsgDialog(AddSongGui.this, "scary_icon.png",
+                          "Url given is invalid", "a unhappy message");
+          }//try catch
+      }//actionPerformed
+    });
+  }//setInteraction
+
+}//class
+public class CorruptedFileException extends java.io.IOException{
+  public CorruptedFileException() {
+    super();
+  }//Exception
+ 	public CorruptedFileException(String message) {
+    super(message);
+  }//Exception
+ 	public CorruptedFileException(String message, Throwable cause) {
+    super(message, cause);
+  }//Exception
+ 	public CorruptedFileException(Throwable cause) {
+    super(cause);
+  }//Exception
+}//class
+public class CorruptedSongException extends java.io.IOException{
+  public CorruptedSongException() {
+    super();
+  }//Exception
+ 	public CorruptedSongException(String message) {
+    super(message);
+  }//Exception
+ 	public CorruptedSongException(String message, Throwable cause) {
+    super(message, cause);
+  }//Exception
+ 	public CorruptedSongException(Throwable cause) {
+    super(cause);
+  }//Exception
+}//class
+public class Main {
+  public static void main(String[] args) {
+    try { new SDBGUI("a very nice mp3 player").setVisible(true); }
+    catch(Exception e) { e.printStackTrace(); }
+  }//main
+}//class
+public class MP3PlayerException extends Exception{
+  public MP3PlayerException() {
+    super();
+  }//Exception
+ 	public MP3PlayerException(String message) {
+    super(message);
+  }//Exception
+ 	public MP3PlayerException(String message, Throwable cause) {
+    super(message, cause);
+  }//Exception
+ 	public MP3PlayerException(Throwable cause) {
+    super(cause);
+  }//Exception
+}//class
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.border.Border;
+import javax.swing.Icon;
+import javax.swing.JList;
+import java.awt.Color;
+import java.awt.Component;
+import sun.swing.DefaultLookup;
+
+
+public class MP3PlayerListCellRenderer extends DefaultListCellRenderer {
+  public MP3PlayerListCellRenderer() { super(); }
+
+  //from java src cde#DefaultListCellRenderer#getListCellRendererComponent
+  @Override
+  public Component getListCellRendererComponent(  JList<?> list,
+                                                  Object value,
+                                                  int index,
+                                                  boolean isSelected,
+                                                  boolean cellHasFocus) {
+    super.getListCellRendererComponent(list, value, index,
+                                       isSelected, cellHasFocus);
+    //color
+    if (isSelected) {
+        super.setBackground(new Color(183, 84, 96));
+        super.setForeground(Color.WHITE);
+    } else {
+        super.setBackground(Utilities.getBackgroundColor());
+        super.setForeground(Utilities.getForegroundColor());
+    }//if else
+
+    //string to display
+    if (value instanceof Icon) {
+      setIcon((Icon)value);
+      setText("");
+    } else {
+      String str;
+      if(value instanceof Song) {
+        str = ((Song) value).shortString();
+      } else {
+        str = value.toString();
+      }//if else
+      setIcon(null);
+      setText(str);
+    }//if else
+
+    //border
+    Border border = null;
+    if (cellHasFocus) {
+      if (isSelected) {
+        border = Utilities.getSelectedBorder();
+      }//if
+    } else {
+      border = Utilities.getNormalBorder();
+    }//if else
+    setBorder(border);
+
+    return this;
+  }//getListCellRendererComponent
+
+}//class
+import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusListener;
+import java.awt.event.FocusEvent;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Container;
+import java.awt.Insets;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+
+public class OptionsGui extends JFrame {
+  private final JLabel filter, sort;
+  private final JButton apply, cancel;
+  private final JComboBox<Song.DATA_TYPE> filterBox, sortBox;
+  private final JTextField filterText;
+
+  private final SDBGUI parent;
+
+  private final GridBagLayout gridBag;
+  private final GridBagConstraints settings;
+  private final Container contents;
+
+  private final String filterPlaceHolder="Enter filter text here...";
+
+  public OptionsGui(SDBGUI parent) {
+    this.parent = parent;
+
+    setTitle("Options");
+    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+    sort = new JLabel("Sort");
+    apply = new JButton("Apply");
+    cancel = new JButton("Cancel");
+    filter = new JLabel("Filter");
+    settings = new GridBagConstraints();
+    filterText = new JTextField(filterPlaceHolder);
+    filterBox = new JComboBox<Song.DATA_TYPE>();
+    sortBox = new JComboBox<Song.DATA_TYPE>();
+    gridBag = new GridBagLayout();
+    contents = getContentPane();
+
+    init();
+
+    setInteraction();
+
+    pack();
+    setLocationRelativeTo(null);
+  }//constructor
+
+  private void init() {
+    //add items to comboboxes
+    for(Song.DATA_TYPE type : Song.DATA_TYPE.values()) {
+      if(!type.toString().startsWith("Exact")) {
+        sortBox.addItem(type);
+      }//if
+      filterBox.addItem(type);
+    }//for
+
+    setLayout(gridBag);
+    settings.fill = GridBagConstraints.HORIZONTAL;
+    settings.insets = new Insets(5,5,5,5);
+    settings.ipady = 5;
+    settings.ipadx = 10;
+    settings.weightx = 1.0;
+    settings.weighty = 1.0;
+    settings.gridx = 0;
+    settings.gridy = 0;
+    settings.gridwidth = 1;
+    contents.add(filter, settings);
+    settings.gridx = 1;
+    settings.gridwidth = 2;
+    contents.add(filterBox, settings);
+    settings.gridx = 3;
+    contents.add(filterText, settings);
+    settings.gridx = 0;
+    settings.gridy = 1;
+    settings.gridwidth = 1;
+    contents.add(sort, settings);
+    settings.gridx = 1;
+    settings.gridwidth = 2;
+    contents.add(sortBox, settings);
+    settings.gridx = 0;
+    settings.gridy = 2;
+    settings.gridwidth = 3;
+    contents.add(apply, settings);
+    settings.gridx = 4;
+    contents.add(cancel, settings);
+
+    Utilities.paintGui(OptionsGui.this);
+  }//init
+
+  private void setInteraction() {
+    filterText.addFocusListener(new FocusListener() {
+      @Override
+      public void focusGained(FocusEvent fe) {
+        if(filterText.getText().equals(filterPlaceHolder)) {
+          filterText.setText("");
+        }
+      }//gainedFocus
+      @Override
+      public void focusLost(FocusEvent fe) {
+        if(filterText.getText().equals("")) {
+          filterText.setText(filterPlaceHolder);
+        }//if
+      }//focusLost
+    });
+    cancel.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent ae) {
+        dispose();
+      }//actionPerformed
+    });
+    apply.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent ae) {
+        Song.DATA_TYPE filterType= (Song.DATA_TYPE) filterBox.getSelectedItem();
+        Song.DATA_TYPE sortType = (Song.DATA_TYPE) sortBox.getSelectedItem();
+        String filterString =
+                            filterText.getText().replace(filterPlaceHolder, "");
+        parent.filterAndSort(filterType, filterString, sortType);
+        dispose();
+      }//actionPerformed
+    });
+  }
+}//class OptionsGui
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.io.File;
+import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.BorderLayout;
+import java.awt.LayoutManager;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.GridBagConstraints;
+import java.awt.event.ActionListener;
+import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JButton;
+import javax.swing.JMenuBar;
+import javax.swing.ListModel;
+import javax.swing.JMenuItem;
+import javax.swing.JComboBox;
+import javax.swing.JTextField;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.border.Border;
+import javax.swing.BorderFactory;
+import javax.swing.AbstractButton;
+import javax.swing.SwingConstants;
+import javax.swing.DefaultListModel;
+import javax.swing.ListSelectionModel;
+
+
+public class SDBGUI extends JFrame {
+  private MP3Player player;
+  private SongDatabase database;
+
+  private final String defaultFilterString = "";
+  private final Song.DATA_TYPE defaultFilter = Song.DATA_TYPE.TITLE;
+  private final Song.DATA_TYPE defaultSortMode = Song.DATA_TYPE.TITLE;
+
+  private String currFilterString;
+  private Song.DATA_TYPE currFilter;
+  private Song.DATA_TYPE currSortMode;
+
+  private final Song.DATA_TYPE[] filterOptions;
+  private final Song.DATA_TYPE[] sortOptions;
+
+  private final JList<Song> songlist;
+  private final JLabel currentSongInfo;
+  private final JButton options, play, edit, close;
+  private final JMenuItem add, save, load;
+  private final JMenuBar menubar;
+  private final JMenu file;
+
+  private final Container contents;
+  private final GridBagLayout gridBag;
+  private final GridBagConstraints settings;
+
+  private final String default_current_song_info_string = "------------------";
+
+  public SDBGUI(String title) throws MP3PlayerException {
+    if(title == null || title == "")
+      throw new MP3PlayerException("title cant be null/empty");
+    player = new MP3Player();
+    try {
+      System.out.println("Using sample database");
+      database = new SongDatabase();//sample database
+    } catch(Exception e) {
+      Utilities.log(e);
+      throw new IllegalArgumentException(e);
+    }//try catch
+
+    filterOptions = Song.DATA_TYPE.values();
+    List<Song.DATA_TYPE> allSortOptions = new ArrayList<Song.DATA_TYPE>();
+    for(Song.DATA_TYPE type : Song.DATA_TYPE.values()) {
+      if(!type.toString().startsWith("Exact")) {
+        allSortOptions.add(type);
+      }//if
+    }//for
+    sortOptions = allSortOptions.toArray(
+                                    new Song.DATA_TYPE[allSortOptions.size()]);
+
+    //general
+    contents = getContentPane();
+    gridBag = new GridBagLayout();
+    settings = new GridBagConstraints();
+
+    //menu
+    menubar = new JMenuBar();
+    file = new JMenu("File") {
+      private Border emptyBorder = BorderFactory.createEmptyBorder();
+      @Override
+      public JPopupMenu getPopupMenu() {
+        JPopupMenu menu = super.getPopupMenu();
+        menu.setBorder(emptyBorder);
+        return menu;
+      }//getPopupMenu
+    };
+    save = new JMenuItem("Save");
+    load = new JMenuItem("Load");
+    add = new JMenuItem("Add");
+
+    //currentSongInfo
+    currentSongInfo = new JLabel(default_current_song_info_string);
+    currentSongInfo.setHorizontalAlignment(SwingConstants.CENTER);
+
+    //functions
+    options = new JButton("Options");
+    play = new JButton("Play");
+    edit = new JButton("Edit");
+    close = new JButton("Close");
+
+    //song list
+    DefaultListModel<Song> model = new DefaultListModel<Song>();
+    songlist = new JList<Song>();
+    filterAndSort(defaultFilter, defaultFilterString, defaultSortMode);
+    songlist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+    setTitle(title);
+    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+    setSize(WIDTH, HEIGHT);
+    setLayout(gridBag);
+    init();
+    setColors();
+    setInteraction();
+    pack();
+    setLocationRelativeTo(null);
+  }//constructor
+
+  private void setColors() {
+
+    Utilities.paintGui(SDBGUI.this);
+
+    file.setBorderPainted(false);
+    menubar.setBorderPainted(false);
+    currentSongInfo.setForeground(Utilities.huicolor);
+    songlist.setForeground(Utilities.taocolor);
+    close.setBorder(BorderFactory.createEmptyBorder());
+  }//setColors
+
+  private void rePaintSonglist(List<Song> songs) {
+    DefaultListModel<Song> model = new DefaultListModel<Song>();
+    for(Song s : songs)
+      model.addElement(s);
+    songlist.setModel(model);
+  }
+
+  public void filterAndSort(Song.DATA_TYPE filter, String filterString,
+                                        Song.DATA_TYPE sortMode) {
+    System.out.println("filter and sort: " + filter + " "
+                      + (filterString.equals("") ? "<EMPTY STRING>"
+                      : filterString) + " " + sortMode);
+    currFilter = filter;
+    currFilterString = filterString;
+    currSortMode = sortMode;
+    List<Song> songs = database.filter(filter, filterString);
+    Song.setSortMode(sortMode);
+    Collections.sort(songs);
+    rePaintSonglist(songs);
+  }//filterAndSort
+
+  public void filterAndSort() {
+    filterAndSort(currFilter, currFilterString, currSortMode);
+  }//filterAndSort
+
+  public boolean removeSong(Song song) {
+    boolean res = database.removeSong(song);
+    filterAndSort();
+    return res;
+  }//removeSong
+
+  public boolean addSong(Song song) {
+    boolean res = database.addSong(song);
+    filterAndSort();
+    return res;
+  }//addSong
+
+  public boolean addSongForce(Song song) {
+    boolean res = database.addSongForce(song);
+    filterAndSort();
+    return res;
+  }//addSong
+
+  private boolean containsSong(Song song) {
+    return database.containsSong(song);
+  }//containsSong
+
+  private void replace(SongDatabase other) {
+    database.replace(other);//replace song only
+    filterAndSort();
+  }//replace
+
+  private Song getSelectedSong() {
+    Song selectedSong = songlist.getSelectedValue();
+    if(selectedSong == null) {
+      Utilities.showMsgDialog(SDBGUI.this, "./scary_icon.png",
+                              "You did not select any song...",
+                              "A message from a deadly loli");
+      return null;
+    } else {
+      return selectedSong;
+    }// if else
+  }//getSelectedSong
+
+  private void init() {
+    settings.fill = GridBagConstraints.HORIZONTAL;
+    settings.anchor = GridBagConstraints.CENTER;
+    settings.gridx = 0;
+    settings.gridy = 0;
+    settings.ipady = 0;
+    settings.ipadx = 0;
+    settings.weightx = 1.0;
+    settings.weighty = 0;
+
+    //menu
+    file.add(add);
+    file.add(save);
+    file.add(load);
+    menubar.add(file);
+    settings.gridwidth = 4;
+    settings.gridheight = 1;
+    contents.add(menubar, settings);
+
+    //current song info display
+    settings.gridy++;
+    settings.ipady = 15;
+    contents.add(currentSongInfo, settings);
+
+    //function buttons
+    settings.ipady = 7;
+    settings.ipadx = 10;
+    settings.gridwidth = 1;
+    settings.gridx = 0;
+    settings.gridy++;
+    contents.add(edit, settings);
+    settings.gridx--;
+    contents.add(play, settings);
+    settings.gridx--;
+    contents.add(options, settings);
+
+    //jlist for songs
+    // settings.ipady = 0;
+    // settings.ipadx = 0;
+    settings.gridy++;
+    settings.gridx = 0;
+    settings.gridwidth = 4;
+    contents.add(songlist, settings);
+
+    //close button
+    settings.ipady = 10;
+    settings.ipadx = 10;
+    settings.gridy++;
+    settings.gridx++;
+    settings.gridwidth = 1;
+    contents.add(close, settings);
+
+  }//init
+
+  private void setInteraction() {
+    edit.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent ae) {
+        Song song = getSelectedSong();
+        if(song != null) {
+          new SongEditGui(SDBGUI.this, song).setVisible(true);
+        }//ifelse
+      }//actionPerformed
+    });
+    play.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent ae) {
+        if(play.getText() == "Play") {
+          Song selectedSong = getSelectedSong();
+          if(selectedSong != null) {
+            try {
+              player.play(selectedSong.getURL());
+              play.setText("Stop");
+              currentSongInfo.setText(selectedSong.shortString());
+            } catch(IOException | NullPointerException ioe) {
+              // ioe.printStackTrace();
+              // player = null;
+              // player = new MP3Player();
+              Utilities.log(ioe);
+              play.setText("Play");
+              Utilities.showMsgDialog(SDBGUI.this, "./cute_icon.png",
+                              "This song can't be played for unknown reason...",
+                                      "a curious and sorry message");
+            }
+          }//if
+        } else if(play.getText() == "Stop") {
+          player.stop();
+          play.setText("Play");
+          currentSongInfo.setText(default_current_song_info_string);
+        }
+      }//actionPerformed
+    });
+    close.addActionListener(new ActionListener() {
+       @Override
+       public void actionPerformed(ActionEvent ae) {
+         String[] options = { "let me go!", "stay a while.." };
+         int reply = Utilities.showQuitDialog( SDBGUI.this, options,
+                                               "./cute_icon.png",
+                                               "Are you sure you want to quit?",
+                                               "wait a moment...");
+         if(reply == 0) {
+           System.out.println("Seeya");
+           System.exit(0);
+         } else {
+           System.out.println("Weebcome baaak");
+         }//ifelse
+       }//actionPerformed
+     });
+    options.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent ae) {
+        new OptionsGui(SDBGUI.this).setVisible(true);
+      }//actionPerformed
+    });
+    add.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent ae) {
+        new AddSongGui(SDBGUI.this).setVisible(true);
+      }//actionPerformed
+    });
+    save.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent ae) {
+        File saveFile = null;//will be override
+        String[] opts = {"save to existing file",
+                          "save to new file", "misclicked.."};
+        int reply = Utilities.showQuitDialog(SDBGUI.this, opts, "cute_icon.png",
+                                            "which way would you like to save?",
+                                            "save options");
+        if(reply == 0) {
+          saveFile = Utilities.getFileFromUser(SDBGUI.this, "data");
+        } else if(reply == 1) {
+          boolean filexists = true;
+          String title = database.getTitle();
+          saveFile = new File(title + ".data");
+          int count = 1;
+          while(saveFile.exists()) {
+            saveFile = new File(title + count++ + ".data");
+          }//while
+        } else {
+          dispose();//do nothing if misclicked option
+        }//if else if else
+
+        if(saveFile == null) dispose();//user didnot select any file
+
+        ObjectOutputStream writer = null;//will be override
+        try {
+          writer = new ObjectOutputStream(new FileOutputStream(saveFile));
+          writer.writeObject(database);
+          System.out.println("successfully saved to: " + saveFile.getName());
+          Utilities.showMsgDialog(SDBGUI.this, "cute_icon.png",
+                                  "database saved successfully to: \""
+                                  + saveFile.getName() + "\"",
+                                  "a delightful message");
+        } catch (IOException ioe) {
+          Utilities.log(ioe);
+          Utilities.showMsgDialog(SDBGUI.this, "cute_icon.png",
+                                  "error encountered while saving...",
+                                  "a sorry message");
+        } catch(Exception e) {
+          Utilities.log(e);
+          Utilities.showMsgDialog(SDBGUI.this, "cute_icon.png",
+                                 "unexpected error encountered while saving...",
+                                  "a sorry message");
+        } finally {
+          try {
+            if(writer != null) {
+              writer.close();
+            }//if
+          } catch(Exception e) {
+            Utilities.log(e);
+            Utilities.showMsgDialog(SDBGUI.this, "cute_icon.png",
+                                    "error encountered while closing file...",
+                                    "a sorry message");
+          }//try catch
+        }//try catch finally
+      }//actionPerformed
+    });
+    load.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent ae) {
+        ObjectInputStream reader = null;
+        File loadFile = Utilities.getFileFromUser(SDBGUI.this, "data");
+        if(loadFile == null)
+          return;
+        if(!loadFile.getName().endsWith(".data")) {
+          Utilities.showMsgDialog(SDBGUI.this, "cute_icon.png",
+                                  "error encountered while reading file...",
+                                  "a sorry message");
+          return;
+        }//if
+
+        try {
+          reader = new ObjectInputStream(new FileInputStream(loadFile));
+          SongDatabase newDatabase = (SongDatabase) reader.readObject();
+          replace(newDatabase);
+          pack();
+          System.out.println("read successfully from: " + loadFile.getName());
+          Utilities.showMsgDialog(SDBGUI.this, "cute_icon.png",
+                                  "database loaded successfully to: \""
+                                  + loadFile.getName() + "\"",
+                                  "a delightful message");
+        } catch (IOException ioe) {
+          Utilities.log(ioe);
+          Utilities.showMsgDialog(SDBGUI.this, "cute_icon.png",
+                                  "error encountered while reading file...",
+                                  "a sorry message");
+        } catch(ClassCastException cce) {
+          Utilities.log(cce);
+          Utilities.showMsgDialog(SDBGUI.this, "scary_icon.png",
+                                  "file has been corrputed...",
+                                  "a curious message");
+        } catch(ClassNotFoundException cfe) {
+          Utilities.log(cfe);
+          Utilities.showMsgDialog(SDBGUI.this, "cute_icon.png",
+                                  "Something unexpected happened...",
+                                  "a curious and sorry message");
+        } finally {
+          try { reader.close(); }
+          catch(Exception e) {
+            Utilities.log(e);
+            Utilities.showMsgDialog(SDBGUI.this, "cute_icon.png",
+                                    "error encountered while closing file...",
+                                    "a sorry message");
+          }//try catch closse reader
+        }//try catches finally
+
+      }//actionPerformed
+    });
+
+    player.setPlaybackListener(new PlayFinishedListener() {
+      @Override
+      public void playFinished() {
+        Song nextSong = getNextSong();
+        if(nextSong != null) {
+          try {
+            player.play(nextSong.getURL());
+            currentSongInfo.setText(nextSong.shortString());
+          } catch(IOException e) {
+            Utilities.log(e);
+            System.out.println("Error while trying to play song");
+            e.printStackTrace();
+          }
+        } else {
+          play.setText("Play");
+          currentSongInfo.setText(default_current_song_info_string);
+        }
+      }//playFinished
+    });
+  }//setInteraction
+
+  //NOTE: UPDATE THIS WHEN MAIN FEATURE FINISHED
+  private Song getNextSong() {
+    return null;
+  }
+
+}//class
+import java.awt.Container;
+import java.awt.GridBagLayout;
+import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.JPanel;
+import javax.swing.JButton;
+
+
+public class SongEditGui extends JFrame {
+  private final JLabel title, genre, artist, url;
+  private final JTextField titleText, genreText, artistText, urlText;
+  private final JButton apply, delete, close;
+  private final JPanel pane;
+
+  private final Container contents;
+  private final GridBagConstraints settings;
+
+  private final SDBGUI parent;
+
+  public SongEditGui(SDBGUI parent, Song song) {
+    super();
+    this.parent = parent;
+
+    String titleStr = "edit: " + song.getTitle() + " - " + song.getArtist();
+    setTitle(titleStr);
+    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+    setLocationRelativeTo(null);
+
+    url  = new JLabel("URL: ");
+    genre = new JLabel("Genre: ");
+    title  = new JLabel("Title: ");
+    artist  = new JLabel("Artist: ");
+    urlText  = new JTextField(song.getURL());
+    genreText = new JTextField(song.getGenre());
+    artistText = new JTextField(song.getArtist());
+    titleText = new JTextField(song.getTitle());
+    delete  = new JButton("Delete");
+    apply  = new JButton("Apply");
+    close = new JButton("Close");
+    pane = new JPanel();
+
+    contents = getContentPane();
+    settings = new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0,
+                                      GridBagConstraints.CENTER,
+                                      GridBagConstraints.HORIZONTAL,
+                                      new Insets(10,10,10,10), 0, 0);
+
+    init();
+
+    setInteraction(song);
+
+    pack();
+    setLocationRelativeTo(null);
+  }//SongEditGui
+
+  private void init() {
+
+    pane.setLayout(new GridBagLayout());
+
+    pane.add(title, settings);
+    settings.gridx++;
+    settings.gridwidth = 2;
+    pane.add(titleText, settings);
+    settings.gridy++;
+    pane.add(genreText, settings);
+    settings.gridx--;
+    pane.add(genre, settings);
+    settings.gridy++;
+    pane.add(artist, settings);
+    settings.gridx++;
+    settings.gridwidth = 2;
+    pane.add(artistText, settings);
+    settings.gridy++;
+    pane.add(urlText, settings);
+    settings.gridx--;
+    pane.add(url, settings);
+    settings.gridwidth = 1;
+    settings.gridy++;
+    pane.add(delete, settings);
+    settings.gridx++;
+    pane.add(apply, settings);
+    settings.gridx++;
+    pane.add(close, settings);
+
+    contents.add(BorderLayout.CENTER, pane);
+
+    Utilities.paintGui(SongEditGui.this);
+
+    delete.setBackground(Color.RED.darker().darker());
+
+  }//init
+
+  private void setInteraction(final Song song) {
+
+    close.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent ae) {
+        String[] options = { "close this edit!", "actually no" };
+        int reply = Utilities.showQuitDialog( SongEditGui.this, options,
+                                              "./cute_icon.png",
+                                              "Are you sure you want to quit ?",
+                                              "wait a moment...");
+        if(reply == 0) dispose();
+        else { System.out.println("Weebcome baaak"); }//ifelse
+      }//actionPerformed
+    });//anonymous listener
+    delete.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent ae) {
+        String[] options = { "I'm 100% sure!", "actually no" };
+        int reply = Utilities.showQuitDialog( SongEditGui.this, options,
+                                      "./cute_icon.png",
+                                      "Are you sure to delete this song ?\n"
+                                   + "NOTE: This can't be recovered internally",
+                                      "wait a moment...");
+        if(reply == 0) {
+            if (parent.removeSong(song)) {
+              System.out.println("remove succeed");
+            } else {
+              Utilities.showMsgDialog(SongEditGui.this, "./cute_icon.png",
+                                      "a unknown problem is encountered "
+                                       +"\nand song can't be deleted...",
+                                      "a sorry message");
+              System.out.println("remove failed");
+            }//ifelse
+            dispose();
+        } else {
+          System.out.println("you love ur song");
+        }//ifelse
+      }//actionPerformed
+    });
+    apply.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent ae) {
+        String[] options = { "just do it!", "let me reconsider.." };
+        int reply = Utilities.showQuitDialog( SongEditGui.this, options,
+                                              "./cute_icon.png",
+                                   "This will reset song play count, continue?",
+                                              "hold a sec...");
+        if(reply == 0) {
+          if(parent.removeSong(song)) {
+            String input = "";
+            input += titleText.getText() + "\t";
+            input += artistText.getText() + "\t";
+            input += genreText.getText() + "\t";
+            input += urlText.getText() + "\t";
+            input += song.getTimesPlayed();
+            try {
+              parent.addSong(new Song(input));
+              dispose();
+            } catch(Exception e) {
+              Utilities.log(e);
+              parent.addSong(song);
+              Utilities.showMsgDialog(SongEditGui.this, "scary_icon.png",
+                            "Url given is invalid", "a unhappy message");
+            }//try catch
+          }//if
+        } else {
+          System.out.println("Weebcome baaak");
+        }//ifelse
+      }//actionPerformed
+    });
+  }//setInteraction
+
+}//class SongEditGui
+import java.io.IOException;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+
+//NOTE: UPDATE THIS WHEN MAIN FEATURE FINISHED
+
+public class SongPlayer extends MP3Player {
+
+  private Song currentSong;
+  private final JPanel gui;
+  private final JLabel songInfo, timeElapsed;
+  private final Thread guiUpdate;
+  private final String default_current_song_info_string =
+                                      "---------------------------------------";
+
+
+  public SongPlayer() {
+    super();
+    gui = new JPanel();
+    songInfo = new JLabel(default_current_song_info_string);
+    timeElapsed = new JLabel("0/0");
+
+    guiUpdate = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        //set the current time and end time and start time
+        //while currenttime < endtime
+        //currenttime = System.getcurrenttimemillis
+        //if (endtime-starttime).to min sec != current display
+        //  timeElapsed setText min/sec
+
+      }//run
+    });
+  }//SongPlayer
+
+  public void play(Song song) throws IOException {
+    currentSong = song;
+    super.play(song.getURL());
+
+    //start a new update gui thread
+
+  }
+
+  @Override
+  public void stop() {
+    super.stop();
+    //end the updateing thread
+  }
+
+  public JPanel getGui() {
+    return this.gui;
+  }
+
+
+}//class SongPlayer
+import java.awt.*;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import javax.swing.*;
+import javax.imageio.ImageIO;
+
+public class Test2 {
+
+    private void displayGUI() {
+        JOptionPane.showConfirmDialog(null,
+                        getPanel(),
+                        "JOptionPane Example : ",
+                        JOptionPane.OK_CANCEL_OPTION,
+                        JOptionPane.PLAIN_MESSAGE);
+    }
+
+    private JPanel getPanel() {
+        JPanel panel = new JPanel();
+        JLabel label = new JLabel("Java Technology Dive Log");
+        ImageIcon image = null;
+        try {
+            image = new ImageIcon(ImageIO.read(
+                    new URL("http://i.imgur.com/6mbHZRU.png")));
+        } catch(MalformedURLException mue) {
+            mue.printStackTrace();
+        } catch(IOException ioe) {
+            ioe.printStackTrace();
+        }
+
+        label.setIcon(image);
+        panel.add(label);
+
+        panel.setBackground(Color.WHITE);
+
+        return panel;
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new Test2().displayGUI();
+            }
+        });
+    }
+}
+import java.util.GregorianCalendar;
+import java.util.Calendar;
+import java.util.Date;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
+import javax.swing.JFrame;
+import javax.swing.JTable;
+import javax.swing.JScrollPane;
+import java.util.Enumeration;
+
+public class Test {
+  // public static void main(String[] args) {
+  //   // String str = "abcd | hjkl | zxcv"; //need use \\| instead
+  //   // String str = "\t\t\tabcd\t0";
+  //   // for(String s : str.split("\t"))
+  //   //   System.out.println("str: " + s);
+  //
+  //   // magic
+  //   //\u000d
+       //System.out.println(new GregorianCalendar().getTime());
+  // }
+
+  public static void main(String[] args) {
+            UIDefaults defaults = UIManager.getDefaults();
+            System.out.println(defaults.size()+ " properties defined !");
+            String[ ] colName = {"Key", "Value"};
+            String[ ][ ] rowData = new String[ defaults.size() ][ 2 ];
+            int i = 0;
+            for(Enumeration e = defaults.keys(); e.hasMoreElements();){
+                Object key = e.nextElement();
+                if(key.toString().indexOf("OptionPane") >= 0) {
+                  rowData[ i ] [ 0 ] = key.toString();
+                  rowData[ i ] [ 1 ] = ""+defaults.get(key);
+                  System.out.println(rowData[i][0]+" ,, "+rowData[i][1]);
+                  i++;
+                }
+            }
+            JFrame f = new JFrame("UIManager properties default values");
+            JTable t = new JTable(rowData, colName);
+            f.setContentPane(new JScrollPane(t));
+            //f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            f.pack();
+            f.setVisible(true);
+        }
+}
+import java.util.GregorianCalendar;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.IOException;
+import java.awt.Image;
+import java.awt.Color;
+import java.awt.Dialog;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.Icon;
+import javax.swing.JList;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JDialog;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JOptionPane;
+import javax.swing.JFileChooser;
+import javax.swing.border.Border;
+import javax.swing.BorderFactory;
+import javax.swing.AbstractButton;
+import javax.swing.border.CompoundBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+public final class Utilities {
+  private Utilities() {}
+
+  public static Color smokered = new Color(137, 78, 84);//smoken red
+  public static Color lightred = new Color(227, 180, 184);//mouse nose red
+  public static Color taocolor = new Color(245, 150, 170);//tao
+  public static Color yingcolor = new Color(254, 223, 225);//ying hua
+  public static Color huicolor = new Color(215, 196, 187);//hui ying
+  public static Color transparentColor = new Color(0,0,0,0);
+
+  public static int showQuitDialog(Component parent, String[] opts,
+                                  String iconPath, String msg, String heading) {
+    Icon cuteIcon = getIcon(iconPath);
+    JButton[] options = getOptions(opts);
+
+    JOptionPane pane = new JOptionPane();
+    pane.setIcon(cuteIcon);
+    pane.setMessage(msg);
+    pane.setOptions(options);
+    pane.setInitialSelectionValue(options[0]);
+    paintAllComponents(pane);
+    //to override paintAllComponents button:
+    paintMarginedButtons(options);
+    JDialog dialog = pane.createDialog(parent, heading);
+    dialog.setVisible(true);
+    dialog.dispose();
+
+    //from java src cde#JOptionPane#showOptionDialog
+    Object selectedValue = pane.getValue();
+    if(selectedValue == null)
+      return JOptionPane.CLOSED_OPTION;
+    if(options == null) {
+      if(selectedValue instanceof Integer)
+        return ((Integer)selectedValue).intValue();
+      return JOptionPane.CLOSED_OPTION;
+    }
+    for(int counter = 0, maxCounter = options.length;
+      counter < maxCounter; counter++) {
+      if(options[counter].equals(selectedValue))
+        return counter;
+    }
+    return JOptionPane.CLOSED_OPTION;
+  }//showQuitDialog
+
+  public static void showMsgDialog(Component parent, String iconPath,
+                                          String msg, String heading) {
+    String[] opts = {"OK Got That"};
+    showQuitDialog(parent, opts, iconPath, msg, heading);
+  }//showMsgDialog
+
+  @SuppressWarnings("unchecked")
+  private static void paintAllComponents(Container parent) {
+    for(Component c : parent.getComponents()) {
+      if(c instanceof JButton) {
+        paintBtn((AbstractButton) c);
+
+      } else if(c instanceof JComboBox) {
+        ((JComboBox<Song>) c).setRenderer(new MP3PlayerListCellRenderer());
+        paintbackfore(c);
+
+      } else if(c instanceof JList) {
+        ((JList<Song>) c).setCellRenderer(new MP3PlayerListCellRenderer());
+        paintbackfore(c);
+
+      } else if(c instanceof Container) {
+        paintAllComponents((Container) c);
+      }//if else if else if else if
+    }//for
+    paintbackfore(parent);
+  }//paintAllComponents
+
+  private static JButton[] getOptions(String[] strs) {
+    final JButton[] btns = new JButton[strs.length];
+    // final Insets margin = new Insets(10,10,10,10);
+    //does not work due to custom border
+    for(int i = 0; i < strs.length; i++) {
+      final JButton btn = new JButton(strs[i]);
+      btns[i] = btn;
+      btn.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+          JOptionPane pane = getOptionPane((JComponent) ae.getSource());
+          pane.setValue(btn);
+        }//actionPerformed
+      });
+    }//for
+    return btns;
+  }//getOptions
+
+  public static Border taoBorder =
+  BorderFactory.createLineBorder(taocolor, 1, true);
+  public static Border emptyBorder = BorderFactory.createEmptyBorder();
+  public static Border margin =
+                            BorderFactory.createLineBorder(transparentColor, 4);
+  public static CompoundBorder marginBorder =
+                          BorderFactory.createCompoundBorder(taoBorder, margin);
+  //for list cell selection and no selection
+  public static Border selectedBorder =
+                                    BorderFactory.createLineBorder(lightred, 1);
+  public static Border normalBorder =
+                            BorderFactory.createLineBorder(transparentColor, 1);
+
+  private static void paintMarginedButtons(AbstractButton[] btns) {
+    for(AbstractButton btn : btns) {
+      btn.setBorder(marginBorder);
+    }//for
+  }//paintMarginedButtons
+
+  private static JOptionPane getOptionPane(JComponent parent) {
+    //from java src cde
+    JOptionPane pane = null;
+    if (!(parent instanceof JOptionPane)) {
+      pane = getOptionPane((JComponent)parent.getParent());
+    } else {
+      pane = (JOptionPane) parent;
+    }
+    return pane;
+  }
+
+  private static JPanel getPanel(String iconPath, String msg) {
+      JPanel panel = new JPanel();
+      JLabel label = new JLabel(msg);
+
+      label.setIcon(getIcon(iconPath));
+      panel.add(label);
+      panel.setBackground(getBackgroundColor());
+
+      return panel;
+  }
+
+  private static Icon getIcon(String path) {
+      //trim icon
+      ImageIcon cuteImageIcon = new ImageIcon(path);
+      Image cuteImage =
+      cuteImageIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+      return new ImageIcon(cuteImage);
+  }//getIcon
+
+  public static File getFileFromUser(JFrame parent, String extension) {
+    String userdir = System.getProperty("user.dir");
+    JFileChooser fileChooser = new JFileChooser(userdir);
+    FileNameExtensionFilter filter =
+                      new FileNameExtensionFilter("*." + extension, extension);
+    fileChooser.setFileFilter(filter);
+    int buttonPressed = fileChooser.showOpenDialog(parent);
+
+    if(buttonPressed == JFileChooser.APPROVE_OPTION) {
+      return fileChooser.getSelectedFile();
+    } else {
+      //user cancelled file chooser
+      return null;
+    }//if else
+  }//getFileFromUser
+
+  public static void paintBtn(AbstractButton c) {
+    paintbackfore(c);
+    c.setBorder(taoBorder);
+    c.setFocusPainted(false);
+    c.setBorder(marginBorder);
+  }//paintBtn
+
+  public static void paintBtn(AbstractButton[] cs) {
+    for(AbstractButton c : cs) {
+      paintBtn(c);
+    }//for
+  }//paintBtn
+
+  public static void paintbackfore(Component c) {
+    c.setBackground(getBackgroundColor());
+    c.setForeground(getForegroundColor());
+  }//paintbackfore
+
+  public static void paintbackfore(Component[] cs) {
+    for(Component c : cs) {
+      paintbackfore(c);
+    }//for
+  }//paintbackfore
+
+  public static Color getBackgroundColor() {
+    return smokered;
+  }
+
+  public static Color getForegroundColor() {
+    return yingcolor;
+  }
+
+  public static Border getSelectedBorder() {
+    return selectedBorder;
+  }//getSelectedBorder
+
+  public static Border getNormalBorder() {
+    return normalBorder;
+  }//getNormalBorder
+
+  public static void paintGui(Container c) {
+    paintAllComponents(c);
+  }
+
+  //log part///////////////////
+
+  private static PrintWriter writer = null;
+  private static File log = new File("log.txt");
+  // static {
+  //   File log = new File("log.txt");
+  //   if(!log.exists()) {
+  //     try {
+  //       log.createNewFile();
+  //     } catch(IOException e) {
+  //       e.printStackTrace();
+  //       System.out.println("error while creating log file");
+  //     }
+  //   }
+  // }//static
+  public static void log(Throwable e) {
+    try {
+      String sls = System.getProperty("line.separator");
+      String time = new GregorianCalendar().getTime().toString() + sls;
+      writer = new PrintWriter(new FileWriter(log, true));
+
+      writer.write(time);
+      e.printStackTrace(writer);
+      writer.write(sls);
+    } catch(IOException ioe) {
+      ioe.printStackTrace();
+      System.err.println("error while logging exception");
+    } finally {
+      writer.close();
+      if(writer != null && writer.checkError()) {
+        System.err.println("error while checking error");
+      }//if
+    }//try catch finally
+  }//log
+}//Utilities

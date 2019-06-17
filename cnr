@@ -1,0 +1,24 @@
+#!/bin/bash
+
+compileOk=1;
+
+for file in ./*.java
+do
+  echo "Compiling $file";
+  # if wan to suppress warning
+
+  #for importing internal sun api
+  javac -XDignore.symbol.file -cp MP3Player/mp3player.jar:. $file;
+  # javac -Xlint:unchecked -cp MP3Player/mp3player.jar:. $file;
+  if [ $? -ne 0 ]; then
+    let compileOk=0;
+  fi
+done
+
+if [ $compileOk -eq 1 ]; then
+  echo "Compile succeed executing Main.java .."
+  echo ""
+  java -classpath MP3Player/mp3player.jar:. Main
+else
+  echo "### compile failed ###"
+fi
