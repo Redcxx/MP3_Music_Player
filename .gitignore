@@ -1,2 +1,4 @@
-mp3player_source_from_jdcore
+mp3player_source_from_jdcore/*
 *.class
+MP3Player/*.html
+MP3Player/*.css
