@@ -16777,3 +16777,187 @@ CorruptedSongException: Invalid url
 	at SDBGUI.<init>(SDBGUI.java:75)
 	at Main.main(Main.java:3)
 
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
+Mon Jun 17 13:52:47 BST 2019
+CorruptedSongException: Invalid url
+	at Song.<init>(Song.java:56)
+	at SongDatabase.<init>(SongDatabase.java:44)
+	at SongDatabase.<init>(SongDatabase.java:73)
+	at SDBGUI.<init>(SDBGUI.java:75)
+	at Main.main(Main.java:3)
+
